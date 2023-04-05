@@ -9,10 +9,10 @@ import javax.sound.midi.MidiMessage
 class ColorButton public constructor(val dp: DrawingPad): LaunchpadReceiver {
     private val arrDelay: Array<Long> = Array(8) { Date().time }
     private val delayDifference = 500L
-    override fun send(message: MidiMessage?, timeStamp: Long) {
+    override fun sendShort(message: MidiMessage, timeStamp: Long) {
         if(dp.state != DrawingPadState.MAIN) return
 
-        val arr: ByteArray = message?.message!!
+        val arr: ByteArray = message.message
         if(arr[0] != 0xB0.toByte()) return
 
         if(arr[1] % 10 != 0x09) return

@@ -2,16 +2,18 @@ package me.ambrie3.draw
 
 import me.ambrie3.draw.interact.ColorButton
 import me.ambrie3.draw.interact.ColorSelectButton
+import me.ambrie3.draw.interact.DrawButton
 import me.ambrie3.draw.interact.OffButton
 import me.ambrie3.lpxapi.*
 import java.awt.Point
 import java.io.Closeable
+import java.util.*
 import javax.sound.midi.ShortMessage
 
 class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String = searchKeyOut, val debug: Boolean = false): Closeable {
     val lpx: LPX
     val colors: ByteArray = ByteArray(8) { 1.toByte() }
-    var focusColor: Int = 0
+    var focusColor: Int = 7
         public set(value) {
             if(debug) println("${javaClass.name} >> focusColor updated to ${value}.")
             field = value
@@ -19,7 +21,8 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
     private val interact: Array<LaunchpadReceiver> = arrayOf(
         ColorButton(this),
         ColorSelectButton(this),
-        OffButton(this)
+        OffButton(this),
+        DrawButton(this)
     )
     public var state: DrawingPadState = DrawingPadState.MAIN
         public set(value) {
@@ -27,6 +30,8 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
             field = value
             redraw()
         }
+    public var stateDelay = Date().time
+    public var defaultFrame: Frame = Frame(this)
 
     init {
         lpx = LPX(keyIn, keyOut)
@@ -44,12 +49,19 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
         }
     }
 
-    public fun redraw() {
+    public fun redraw(frame: Frame? = defaultFrame) {
         if(debug) println("${javaClass.name} >> Redrawing display.")
         lpx.sendStaticColVel(ButtonVal.h9.b(), 5)
         lpx.sendStaticColVel(ButtonVal.i9.b(), 3)
+        stateDelay = Date().time
         when(state) {
             DrawingPadState.MAIN -> {
+                for(x in 0 until 8)
+                    for(y in 0 until 8) {
+                        if(frame != null) lpx.sendStaticColVel(twoDimToByte(x, y), frame.aa[y][x])
+                        else lpx.sendStaticColVel(twoDimToByte(x, y), 0)
+                    }
+
                 for(i in 0 until 8) {
                     lpx.sendRaw(ShortMessage(
                         if(i == focusColor) 0x92 else 0x90,

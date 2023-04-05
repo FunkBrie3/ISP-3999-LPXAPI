@@ -1,4 +1,4 @@
-package _lpx
+package me.ambrie3.lpxapi
 
 enum class ButtonVal private constructor(private val byte: Int) {
     a1(0x0B), b1(0x0C), c1(0x0D), d1(0x0E), e1(0x0F), f1(0x10), g1(0x11), h1(0x12), i1(0x13),

@@ -1,4 +1,4 @@
-package _lpx
+package me.ambrie3.lpxapi
 
 enum class LPXSignal private constructor(vararg val bytes: Byte) {
     SYSEX_HEADER(0xF0.toByte(), 0x00.toByte(), 0x20.toByte(), 0x29.toByte(), 0x02.toByte(), 0x0C.toByte()),

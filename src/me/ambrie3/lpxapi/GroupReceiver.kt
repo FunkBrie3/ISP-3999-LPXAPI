@@ -1,4 +1,4 @@
-package _lpx
+package me.ambrie3.lpxapi
 
 import javax.sound.midi.MidiMessage
 import javax.sound.midi.Receiver

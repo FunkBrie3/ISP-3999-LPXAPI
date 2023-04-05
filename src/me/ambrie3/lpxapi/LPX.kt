@@ -1,4 +1,4 @@
-package _lpx
+package me.ambrie3.lpxapi
 
 import java.awt.Color
 import javax.sound.midi.MidiDevice
@@ -59,14 +59,6 @@ class LPX {
         input.open()
         groupReceiver = GroupReceiver()
         getTransmitter().receiver = groupReceiver
-
-        frameTick = Thread {
-            val delay: Long = 1000L/fps
-            while(!cancelFrame) {
-
-                Thread.sleep(delay)
-            }
-        }
     }
 
     public fun addReceiver(receiver: LaunchpadReceiver): Boolean = groupReceiver.receivers.add(receiver)
@@ -90,14 +82,6 @@ class LPX {
     public fun sendFlashColVel(note: Byte, velocity: Byte) = sendRaw(ShortMessage(0x91, note.toInt(), velocity.toInt()))
     public fun sendPulseColVel(note: Byte, velocity: Byte) = sendRaw(ShortMessage(0x92, note.toInt(), velocity.toInt()))
     public fun sendSimpleOff(note: Byte) = sendRaw(ShortMessage(0x80, note.toInt(), 0))
-
-    lateinit var frameTick: Thread
-    var cancelFrame: Boolean = false
-    private val fps: Long = 25L
-    private val dim: Array<Array<SysLED?>> = Array(8) { Array(8) { null } }
-    public fun tick() {
-
-    }
 
     public fun sendSysexRaw(vararg bytes: Byte) = output { getReceiver().send(SysexMessage(bytes, bytes.size), -1) }
     /**
@@ -144,6 +128,5 @@ class LPX {
     public fun close() {
         groupReceiver.close()
         input.close()
-        cancelFrame = true
     }
 }

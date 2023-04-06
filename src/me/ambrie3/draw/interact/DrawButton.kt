@@ -9,7 +9,6 @@ import javax.sound.midi.MidiMessage
 
 class DrawButton public constructor(val dp: DrawingPad): LaunchpadReceiver {
     override fun sendShort(message: MidiMessage, timeStamp: Long) {
-        if(Date().time - dp.stateDelay < 10L) return
         if(dp.state != DrawingPadState.MAIN) return
 
         val arr: ByteArray = message.message

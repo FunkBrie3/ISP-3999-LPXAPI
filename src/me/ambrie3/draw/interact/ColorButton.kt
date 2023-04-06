@@ -8,7 +8,7 @@ import javax.sound.midi.MidiMessage
 
 class ColorButton public constructor(val dp: DrawingPad): LaunchpadReceiver {
     private val arrDelay: Array<Long> = Array(8) { Date().time }
-    private val delayDifference = 500L
+    private val delayDifference = 250L
     override fun sendShort(message: MidiMessage, timeStamp: Long) {
         if(dp.state != DrawingPadState.MAIN) return
 

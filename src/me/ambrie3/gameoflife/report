@@ -1,0 +1,24 @@
+# # Goal: Create a small-scale replica of Conway's Game of Life, with the correct ruleset and an
+# # interactive display to modify Tile states.
+
+Initial work began with a simplified automated sending of specifically designated true/false values
+to the device to be displayed on the 8x8 grid, using a 2-dimensional array.
+    - Tile class was created, storing the current and next state of a tile, as well as 8 surrounding tiles.
+    - Conway's game of life logic easy to implement, difficulty came from programming tasks.
+
+TileManager, TileAnim classes are created to more effectively manage and display outputs to LPX MIDI.
+    - TileManager stores the actual 2d array of Tiles, and the logic to iterate through each and push to
+      the next state.
+    - TileAnim is an enum storing color values for when a tile appears, disappears, stays alive/dead
+      and is controlled through TileManager and Tile::pushState.
+
+A input readback system was implemented to allow the user to move to the next state/frame.
+    - A drawing feature was implemented to set tiles on/off to test patterns.
+    - TileReceiver class manages receiving of midi data.
+    - TileManagerState stores the state of the GUI, being either the main page or toggle on/off Tile page.
+    - Tile animations had to be removed due to an internal Java error. Java depends on external libraries
+      written in languages like c/c++, which is what was causing the fatal crash. My best estimate is
+      multiple accesses to send midi data to the LPX MIDI device from different threads caused an external
+      API error which crashed the software. Possible fix for this could be adding a frame limit per second,
+      by storing each sent frame attempt in an array and combining them all, sending at a rate of 25fps for
+      simplicity. (25fps due to delay on Threads being ms based. 1000/25=40, whole number).

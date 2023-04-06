@@ -12,7 +12,7 @@ import javax.sound.midi.ShortMessage
 
 class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String = searchKeyOut, val debug: Boolean = false): Closeable {
     val lpx: LPX
-    val colors: ByteArray = ByteArray(8) { 1.toByte() }
+    val colors: ByteArray = ByteArray(8) { 3.toByte() }
     var focusColor: Int = 7
         public set(value) {
             if(debug) println("${javaClass.name} >> focusColor updated to ${value}.")
@@ -30,10 +30,10 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
             field = value
             redraw()
         }
-    public var stateDelay = Date().time
     public var defaultFrame: Frame = Frame(this)
 
     init {
+        print("$keyIn $keyOut")
         lpx = LPX(keyIn, keyOut)
         interact.forEach { lpx.addReceiver(it) }
         lpx.sendSysexModeProgrammer()
@@ -53,7 +53,6 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
         if(debug) println("${javaClass.name} >> Redrawing display.")
         lpx.sendStaticColVel(ButtonVal.h9.b(), 5)
         lpx.sendStaticColVel(ButtonVal.i9.b(), 3)
-        stateDelay = Date().time
         when(state) {
             DrawingPadState.MAIN -> {
                 for(x in 0 until 8)

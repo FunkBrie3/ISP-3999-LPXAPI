@@ -27,7 +27,7 @@ class ColorButton public constructor(val dp: DrawingPad): LaunchpadReceiver {
                 dp.state = DrawingPadState.COLOR_SELECT
             } else {
                 if(dp.debug) println("${javaClass.name} >> Color $num short signal press detected.")
-                dp.redraw()
+                dp.draw()
             }
         } else {
             arrDelay[num] = Date().time

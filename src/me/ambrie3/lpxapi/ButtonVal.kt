@@ -12,4 +12,8 @@ enum class ButtonVal private constructor(private val byte: Int) {
     a9(0x5B), b9(0x5C), c9(0x5D), d9(0x5E), e9(0x5F), f9(0x60), g9(0x61), h9(0x62), i9(0x63);
 
     public fun b(): Byte = byte.toByte()
+
+    companion object {
+        public fun side(): ByteArray = arrayOf(a9, b9, c9, d9, e9, f9, g9, h9, i9, i8, i7, i6, i5, i4, i3, i2, i1).map { it.b() }.toByteArray()
+    }
 }

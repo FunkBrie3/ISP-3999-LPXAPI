@@ -13,7 +13,7 @@ fun main(args: Array<String>) {
     println("\tconway")
     println("Args (-in INKEY) (-out OUTKEY) <-debug> may be used.")
     val s: String = sc.nextLine()
-    val sarr: List<String> = s.split("\\s+")
+    val sarr: List<String> = s.split("\\s+".toRegex())
 
     var inS: String? = null
     var outS: String? = null
@@ -21,18 +21,17 @@ fun main(args: Array<String>) {
 
     var id: Int = -1
     for(n in sarr.indices) {
-        if(args[n] == "-debug") debug = true
-        if(args.size - 1 > n) {
-            if(args[n] == "-in" && inS == null) inS = args[n + 1]
-            else if(args[n] == "-out" && outS == null) outS = args[n + 1]
+        if(sarr[n] == "-debug") debug = true
+        if(sarr.size - 1 > n) {
+            if(sarr[n] == "-in" && inS == null) inS = sarr[n + 1]
+            else if(sarr[n] == "-out" && outS == null) outS = sarr[n + 1]
         }
-        if(args[n] == "draw") id = 1
-        if(args[n] == "conway") id = 0
+        if(sarr[n] == "draw") id = 1
+        if(sarr[n] == "conway") id = 0
     }
     when(id) {
         0 -> TileManager(inS ?: searchKeyIn, outS ?: searchKeyOut)
         1 -> DrawingPad(inS ?: searchKeyIn, outS ?: searchKeyOut, debug)
         else -> println("No program value selected. Terminating.")
     }
-    DrawingPad(inS ?: searchKeyIn, outS ?: searchKeyOut, debug)
 }

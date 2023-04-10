@@ -3,17 +3,20 @@ package me.ambrie3.draw
 import java.awt.Color
 
 class ColorGroup {
-    private val colors: ArrayList<Color> = arrayListOf()
+    private val colors: ArrayList<HSVColor> = arrayListOf()
     var color: Color = Color.BLACK
 
-    fun addColor(color: Color) {
-        colors.add(color)
-        var r: Int = 0; var g: Int = 0; var b: Int = 0
+    fun addColor(hsvColor: HSVColor) {
+        colors.add(hsvColor)
+        var h: Int = 0; var s: Int = 0; var v: Int = 0
         for(c in colors) {
-            r += c.red; g += c.green; b += c.blue
+            h += c.h
+            s += c.s
+            v += c.v
         }
-        r /= colors.size; g /= colors.size; b /= colors.size;
-        this.color = Color(r, g, b)
+        h /= colors.size; s /= colors.size; v /= colors.size
+        println("Color -> $h $s $v -> ${colors.size}")
+        this.color = HSVColor.HSVtoRGB(h, s, v)
     }
     fun erase() {
         colors.clear()

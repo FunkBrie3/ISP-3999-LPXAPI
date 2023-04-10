@@ -2,6 +2,7 @@ package me.ambrie3.draw.interact
 
 import me.ambrie3.draw.DrawingPad
 import me.ambrie3.draw.DrawingPadState
+import me.ambrie3.draw.HSVColor
 import me.ambrie3.lpxapi.ButtonVal
 import me.ambrie3.lpxapi.LaunchpadReceiver
 import me.ambrie3.lpxapi.SysLED
@@ -22,14 +23,14 @@ class ColorSelectPage public constructor(val dp: DrawingPad): LaunchpadReceiver 
 
         if(dp.debug) println("${javaClass.name} >> Signal received.")
 
-        if(arr[0] == 0xB0.toByte()) {
+        if(arr[0] == 0x90.toByte()) {
             val point: Point = DrawingPad.byteToTwoDim(arr[1])
             var h: Int = 0
             for(x in 0 until 8)
                 for(y in 0 until 8) {
                     if((x == 0 || x == 7) && (y == 0 || y == 7)) continue
                     if(point.x == x && point.y == y) {
-                        dp.colors[dp.focusColor] = DrawingPad.HSVtoRGB(h, s, v)
+                        dp.colors[dp.focusColor] = HSVColor(h, s, v)
                         dp.state = DrawingPadState.MAIN
                         return
                     }
@@ -64,7 +65,7 @@ class ColorSelectPage public constructor(val dp: DrawingPad): LaunchpadReceiver 
                 } else {
                     sysledarr.add(SysLED.rgb(
                         DrawingPad.twoDimToByte(x, y),
-                        DrawingPad.HSVtoRGB(h, s, v)
+                        HSVColor.HSVtoRGB(h, s, v)
                     ))
                     h += 6
                 }

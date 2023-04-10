@@ -1,6 +1,7 @@
 package me.ambrie3.draw
 
 import me.ambrie3.draw.interact.ColorSelectPage
+import me.ambrie3.draw.interact.MainPage
 import me.ambrie3.lpxapi.*
 import java.awt.Color
 import java.awt.Point
@@ -14,7 +15,7 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
     val lpx: LPX
 
     // Each individual color stored actively in the program as usable.
-    val colors: Array<Color> = Array(8) { Color.WHITE }
+    val colors: Array<HSVColor> = Array(8) { HSVColor(0, 0, 100) }
     // The color being focused on (index of colors ByteArray)
     var focusColor: Int = 7
         public set(value) {
@@ -23,6 +24,7 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
         }
 
     // Each LaunchpadReceiver is listed below in a group.
+    private val mainPage: MainPage = MainPage(this)
     private val colorSelectPage: ColorSelectPage = ColorSelectPage(this)
 
     // The current state of the drawing program. Used with LaunchpadReceivers and drawing. Setting var calls redraw()
@@ -34,13 +36,14 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
         }
 
     // The current frame via index + The frame array
-    val frameArray: ArrayList<Frame> = arrayListOf(Frame())
+    val frameArray: ArrayList<Frame> = arrayListOf(Frame(this))
     val frameIndex: Int = 0
 
     // Initializer (called with constructor)
     init {
         lpx = LPX(keyIn, keyOut)
 
+        lpx.addReceiver(mainPage)
         lpx.addReceiver(colorSelectPage)
 
         lpx.sendSysexModeProgrammer()
@@ -65,62 +68,14 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
         fun twoDimToByte(x: Int, y: Int): Byte {
             return (0x0B + x + (10 * y)).toByte()
         }
-
-        fun HSVtoRGB(h: Int, s: Int, v: Int): Color {
-            // H -> 0-360, S -> 0-100, V -> 0-100
-
-            // Initial hue calculations
-            var r: Int = when(h / 60) {
-                0 -> 255
-                1 -> 255 - HtoScale(h)
-                2 -> 0
-                3 -> 0
-                4 -> HtoScale(h)
-                5 -> 255
-                else -> 255
-            }
-            var g: Int = when(h / 60) {
-                0 -> HtoScale(h)
-                1 -> 255
-                2 -> 255
-                3 -> 255 - HtoScale(h)
-                4 -> 0
-                5 -> 0
-                else -> 0
-            }
-            var b: Int = when(h / 60) {
-                0 -> 0
-                1 -> 0
-                2 -> HtoScale(h)
-                3 -> 255
-                4 -> 255
-                5 -> 255 - HtoScale(h)
-                else -> 0
-            }
-
-            // Saturation calculations
-            val sMult: Float = 1 - (s.toFloat() / 100)
-            r += ((255 - r) * sMult).toInt()
-            g += ((255 - g) * sMult).toInt()
-            b += ((255 - b) * sMult).toInt()
-
-            // Value calculations
-            r = (r * (v.toFloat() / 100)).toInt()
-            g = (g * (v.toFloat() / 100)).toInt()
-            b = (b * (v.toFloat() / 100)).toInt()
-
-            return Color(r, g, b)
-        }
-
-        private fun HtoScale(a: Int): Int {
-            return (((a.toFloat() / 60f) % 1) * 255).toInt()
-        }
     }
 
     public fun draw() {
         if(debug) println("${javaClass.name} >> Redrawing display.")
         when(state) {
             DrawingPadState.MAIN -> {
+                lpx.sendSysexLED(*mainPage.draw().toTypedArray())
+                /*
                 for(x in 0 until 8)
                     for(y in 0 until 8) {
                         if(frame != null) lpx.sendStaticColVel(twoDimToByte(x, y), frame.aa[y][x])
@@ -137,9 +92,11 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
 
                 for(j in arrayOf(0x5B, 0x5C, 0x5D, 0x5E, 0x5F, 0x60, 0x61))
                     lpx.sendSimpleOff(j.toByte())
+
+                 */
             }
             DrawingPadState.COLOR_SELECT -> {
-                lpx.sendSysexLED(*ColorSelectPage.draw().toTypedArray())
+                lpx.sendSysexLED(*colorSelectPage.draw().toTypedArray())
             }
         }
     }

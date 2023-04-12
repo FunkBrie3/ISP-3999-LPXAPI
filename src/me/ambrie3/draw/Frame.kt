@@ -1,10 +1,9 @@
 package me.ambrie3.draw
 
 import me.ambrie3.lpxapi.SysLED
-import java.awt.Point
 
-class Frame public constructor(val dp: DrawingPad) {
-    val pixels: Array<Array<ColorGroup>> = Array(8) { Array(8) { ColorGroup() } }
+class Frame public constructor() {
+    val pixels: Array<Array<ColorGroup>> = Array(9) { Array(9) { ColorGroup() } }
     fun draw(isFullDraw: Boolean = false): ArrayList<SysLED> {
         val sysledarr: ArrayList<SysLED> = arrayListOf()
 
@@ -17,5 +16,14 @@ class Frame public constructor(val dp: DrawingPad) {
             }
 
         return sysledarr
+    }
+    fun clone(): Frame {
+        val out = Frame()
+        for(x in 0 until 9) {
+            for(y in 0 until 9) {
+                out.pixels[y][x] = this.pixels[y][x].clone()
+            }
+        }
+        return out
     }
 }

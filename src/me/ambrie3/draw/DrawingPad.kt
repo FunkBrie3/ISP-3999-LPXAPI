@@ -36,8 +36,8 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
         }
 
     // The current frame via index + The frame array
-    val frameArray: ArrayList<Frame> = arrayListOf(Frame(this))
-    val frameIndex: Int = 0
+    val frameArray: ArrayList<Frame> = arrayListOf(Frame())
+    var frameIndex: Int = 0
 
     // Initializer (called with constructor)
     init {

@@ -1,9 +1,6 @@
 package me.ambrie3.draw.interact
 
-import me.ambrie3.draw.ColorGroup
-import me.ambrie3.draw.DrawingPad
-import me.ambrie3.draw.DrawingPadState
-import me.ambrie3.draw.HSVColor
+import me.ambrie3.draw.*
 import me.ambrie3.lpxapi.ButtonVal
 import me.ambrie3.lpxapi.LaunchpadReceiver
 import me.ambrie3.lpxapi.SysLED
@@ -27,13 +24,57 @@ class MainPage(val dp: DrawingPad): LaunchpadReceiver {
 
         drawPixel(arr)
 
-        if(arr[0] == 0xB0.toByte() && arr[1] == ButtonVal.e9.b() && arr[2] != 0.toByte())
+        frameManager(arr)
+
+        if(arr[0] == 0xB0.toByte() && arr[1] == ButtonVal.g9.b() && arr[2] != 0.toByte())
             dp.focusColor = 8
 
         if(arr[0] == 0xB0.toByte() && arr[1] == ButtonVal.h9.b() && arr[2] != 0.toByte())
             dp.close()
     }
 
+    fun frameManager(arr: ByteArray) {
+        if(arr[0] != 0xB0.toByte() || arr[2] == 0.toByte()) return
+        // Clone frame behind
+        if(arr[1] == ButtonVal.a9.b())
+            if(dp.frameArray.size > 1 && dp.frameIndex != 0) {
+                dp.frameArray[dp.frameIndex] = dp.frameArray[dp.frameIndex - 1].clone()
+                dp.draw()
+            }
+
+        // Clone frame in front
+        if(arr[1] == ButtonVal.b9.b())
+            if(dp.frameArray.size > 1 && dp.frameIndex != dp.frameArray.size - 1) {
+                dp.frameArray[dp.frameIndex] = dp.frameArray[dp.frameIndex + 1].clone()
+                dp.draw()
+            }
+
+        // Remove frame
+        if(arr[1] == ButtonVal.e9.b() && dp.frameArray.size > 1) {
+            dp.frameArray.removeAt(dp.frameIndex)
+            if(dp.frameIndex != 0) dp.frameIndex--
+            dp.draw()
+        }
+
+        // Adds frame
+        if(arr[1] == ButtonVal.f9.b() && dp.frameArray.size < 128) {
+            dp.frameArray.add(dp.frameIndex + 1, Frame())
+            dp.frameIndex++
+            dp.draw()
+        }
+
+        // Back frame
+        if(arr[1] == ButtonVal.c9.b() && dp.frameIndex != 0) {
+            dp.frameIndex--
+            dp.draw()
+        }
+
+        // Forward frame
+        if(arr[1] == ButtonVal.d9.b() && dp.frameIndex != dp.frameArray.size - 1) {
+            dp.frameIndex++
+            dp.draw()
+        }
+    }
     fun drawPixel(arr: ByteArray) {
         if(arr[0] == 0x90.toByte() && arr[2] != 0.toByte()) {
             val point: Point = DrawingPad.byteToTwoDim(arr[1])
@@ -71,12 +112,29 @@ class MainPage(val dp: DrawingPad): LaunchpadReceiver {
                 HSVColor.HSVtoRGB(hsvcolor.h, hsvcolor.s, hsvcolor.v)
             ))
         }
-        arrsysled.add(SysLED.rgb(ButtonVal.e9.b(), Color(255, 0, 240)))
-        arrsysled.add(SysLED.rgb(ButtonVal.h9.b(), Color.RED))
-        arrsysled.add(SysLED.rgb(ButtonVal.a9.b(), Color.BLACK))
-        arrsysled.add(SysLED.rgb(ButtonVal.b9.b(), Color.BLACK))
-        arrsysled.add(SysLED.rgb(ButtonVal.c9.b(), Color.BLACK))
-        arrsysled.add(SysLED.rgb(ButtonVal.d9.b(), Color.BLACK))
+        for(b in ButtonVal.side()) {
+            if(b < 0x5B.toByte()) continue
+            arrsysled.add(
+                when(b) {
+                    ButtonVal.g9.b() -> SysLED.rgb(b, Color(255, 0, 248))
+                    ButtonVal.h9.b() -> SysLED.rgb(b, Color.RED)
+
+                    ButtonVal.a9.b() -> SysLED.rgb(b, if(dp.frameArray.size > 1 && dp.frameIndex != 0)
+                        Color.CYAN else Color.BLACK)
+                    ButtonVal.b9.b() -> SysLED.rgb(b, if(dp.frameArray.size > 1 && dp.frameIndex != dp.frameArray.size - 1)
+                        Color.CYAN else Color.BLACK)
+                    ButtonVal.e9.b() -> SysLED.rgb(b, if(dp.frameArray.size > 1)
+                        Color.RED.darker().darker() else Color.BLACK)
+                    ButtonVal.f9.b() -> SysLED.rgb(b, if(dp.frameArray.size < 128)
+                        Color.GREEN.darker().darker() else Color.BLACK)
+                    ButtonVal.c9.b() -> SysLED.rgb(b, if(dp.frameIndex != 0)
+                        Color.RED else Color.BLACK)
+                    ButtonVal.d9.b() -> SysLED.rgb(b, if(dp.frameIndex != dp.frameArray.size - 1)
+                        Color.GREEN else Color.BLACK)
+                    else -> SysLED.rgb(b, Color.BLACK)
+                }
+            )
+        }
         return arrsysled
     }
 }

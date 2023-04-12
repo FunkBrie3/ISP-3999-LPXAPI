@@ -1,5 +1,5 @@
 package me.ambrie3.draw
 
 enum class DrawingPadState {
-    MAIN, COLOR_SELECT, DRAW_ADVANCED
+    MAIN, COLOR_SELECT, COLOR_PICK
 }

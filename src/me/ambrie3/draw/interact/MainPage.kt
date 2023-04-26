@@ -6,8 +6,13 @@ import me.ambrie3.lpxapi.LaunchpadReceiver
 import me.ambrie3.lpxapi.SysLED
 import java.awt.Color
 import java.awt.Point
+import java.awt.desktop.UserSessionEvent
+import java.io.File
 import java.util.*
 import javax.sound.midi.MidiMessage
+import javax.swing.JFileChooser
+import javax.swing.JFrame
+import javax.swing.UIManager
 import kotlin.collections.ArrayList
 
 class MainPage(val dp: DrawingPad): LaunchpadReceiver {
@@ -26,8 +31,10 @@ class MainPage(val dp: DrawingPad): LaunchpadReceiver {
 
         frameManager(arr)
 
-        if(arr[0] == 0xB0.toByte() && arr[1] == ButtonVal.g9.b() && arr[2] != 0.toByte())
-            dp.focusColor = 8
+        export(arr)
+
+        if(arr[0] == 0xB0.toByte() && arr[1] == ButtonVal.i8.b() && arr[2] != 0.toByte())
+            dp.focusColor = 7
 
         if(arr[0] == 0xB0.toByte() && arr[1] == ButtonVal.h9.b() && arr[2] != 0.toByte())
             dp.close()
@@ -79,16 +86,34 @@ class MainPage(val dp: DrawingPad): LaunchpadReceiver {
         if(arr[0] == 0x90.toByte() && arr[2] != 0.toByte()) {
             val point: Point = DrawingPad.byteToTwoDim(arr[1])
             val colorGroup: ColorGroup = dp.frameArray[dp.frameIndex].pixels[point.y][point.x]
-            if(dp.focusColor == 8) colorGroup.erase() else colorGroup.addColor(dp.colors[dp.focusColor])
+            if(dp.focusColor == 7) colorGroup.erase() else colorGroup.addColor(dp.colors[dp.focusColor])
             dp.draw()
         }
     }
 
-    private val arrColorDelay: Array<Long> = Array(8) { Date().time }
+    /**
+     * Exports to a .lpa file.
+     */
+    fun export(arr: ByteArray) {
+        if(!(arr[0] == 0xB0.toByte() && arr[1] == ButtonVal.g9.b() && arr[2] != 0.toByte())) return
+        UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel")
+        val fileChooser: JFileChooser = JFileChooser()
+        val parentFrame: JFrame = JFrame()
+        fileChooser.dialogTitle = "Choose a Directory + Name"
+        val sel: Int = fileChooser.showSaveDialog(parentFrame)
+
+        if (sel == JFileChooser.APPROVE_OPTION) {
+            val file: File = fileChooser.selectedFile
+            SaveAnim.save(file.absolutePath, dp)
+        }
+    }
+
+    private val arrColorDelay: Array<Long> = Array(7) { Date().time }
     private val colorDelayDifference = 250L
     fun colorSelect(arr: ByteArray) {
         if(arr[1] % 10 != 0x09) return
         val num = (arr[1] - 0x13) / 10
+        if(num >= 7) return
 
         if(arr[2] == 0.toByte()) {
             dp.focusColor = num
@@ -105,7 +130,7 @@ class MainPage(val dp: DrawingPad): LaunchpadReceiver {
     }
     fun draw(): ArrayList<SysLED> {
         val arrsysled: ArrayList<SysLED> = dp.frameArray[dp.frameIndex].draw(false)
-        for(i in 0 until 8) {
+        for(i in 0 until 7) {
             val hsvcolor: HSVColor = dp.colors[i]
             arrsysled.add(SysLED.rgb(
                 (0x13 + (i * 10)).toByte(),
@@ -113,10 +138,10 @@ class MainPage(val dp: DrawingPad): LaunchpadReceiver {
             ))
         }
         for(b in ButtonVal.side()) {
-            if(b < 0x5B.toByte()) continue
+            if(b < 0x59.toByte()) continue
             arrsysled.add(
                 when(b) {
-                    ButtonVal.g9.b() -> SysLED.rgb(b, Color(255, 0, 248))
+                    ButtonVal.i8.b() -> SysLED.rgb(b, Color(255, 0, 248))
                     ButtonVal.h9.b() -> SysLED.rgb(b, Color.RED)
 
                     ButtonVal.a9.b() -> SysLED.rgb(b, if(dp.frameArray.size > 1 && dp.frameIndex != 0)

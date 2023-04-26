@@ -75,25 +75,6 @@ class DrawingPad public constructor(keyIn: String = searchKeyIn, keyOut: String 
         when(state) {
             DrawingPadState.MAIN -> {
                 lpx.sendSysexLED(*mainPage.draw().toTypedArray())
-                /*
-                for(x in 0 until 8)
-                    for(y in 0 until 8) {
-                        if(frame != null) lpx.sendStaticColVel(twoDimToByte(x, y), frame.aa[y][x])
-                        else lpx.sendStaticColVel(twoDimToByte(x, y), 0)
-                    }
-
-                for(i in 0 until 8) {
-                    lpx.sendRaw(ShortMessage(
-                        if(i == focusColor) 0x92 else 0x90,
-                        (0x13 + (i * 10)),
-                        colors[i].toInt()
-                    ))
-                }
-
-                for(j in arrayOf(0x5B, 0x5C, 0x5D, 0x5E, 0x5F, 0x60, 0x61))
-                    lpx.sendSimpleOff(j.toByte())
-
-                 */
             }
             DrawingPadState.COLOR_SELECT -> {
                 lpx.sendSysexLED(*colorSelectPage.draw().toTypedArray())

@@ -5,6 +5,7 @@ import java.awt.Color
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.LinkedList
 
 object SaveAnim {
     public fun Color.equalsC(other: Color): Boolean {
@@ -22,16 +23,29 @@ object SaveAnim {
                     val c: Color = frame.pixels[y][x].color
                     if(virtualPng[y][x] == c) continue
                     virtualPng[y][x] = c
-                    outStream.write(byteArrayOf(DrawingPad.twoDimToByte(x, y)))
-                    outStream.write(c.rgb)
+                    outStream.write(DrawingPad.twoDimToByte(x, y).toUByte().toInt())
+                    outStream.write(c.red)
+                    outStream.write(c.green)
+                    outStream.write(c.blue)
                 }
-            outStream.write(byteArrayOf(-1))
+            outStream.write(0);
         }
         outStream.close()
     }
-    public fun load(fileName: String): Array<Array<SysLED>> {
-        val file: File = File("${fileName}.lpa")
+    public fun load(fileName: String): ArrayList<ArrayList<SysLED>> {
+        val file: File = File(fileName)
         val inStream: FileInputStream = FileInputStream(file)
-
+        val sysledanim: ArrayList<ArrayList<SysLED>> = arrayListOf(arrayListOf())
+        var sysledframe: ArrayList<SysLED> = arrayListOf()
+        while(inStream.available() > 0) {
+            var b: Int = inStream.read()
+            if(b == 0) {
+                sysledanim.add(sysledframe)
+                sysledframe = arrayListOf()
+                continue
+            }
+            sysledframe.add(SysLED.rgb(b.toByte(), Color(inStream.read(),inStream.read(),inStream.read())))
+       }
+        return sysledanim
     }
 }

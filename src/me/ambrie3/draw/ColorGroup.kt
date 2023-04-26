@@ -3,29 +3,30 @@ package me.ambrie3.draw
 import java.awt.Color
 
 class ColorGroup {
-    private var colors: ArrayList<HSVColor> = arrayListOf()
+    private var colors: HSVColor = HSVColor(0, 0, 0)
+    var weight: Int = 0
     var color: Color = Color.BLACK
 
     fun addColor(hsvColor: HSVColor) {
-        colors.add(hsvColor)
-        var h: Int = 0; var s: Int = 0; var v: Int = 0
-        for(c in colors) {
-            h += c.h
-            s += c.s
-            v += c.v
-        }
-        h /= colors.size; s /= colors.size; v /= colors.size
-        this.color = HSVColor.HSVtoRGB(h, s, v)
+        colors.h += hsvColor.h
+        colors.s += hsvColor.s
+        colors.v += hsvColor.v
+        weight++
+        this.color = HSVColor.HSVtoRGB(
+            colors.h / weight,
+            colors.s / weight,
+            colors.v / weight
+        )
     }
     fun erase() {
-        colors.clear()
+        colors.h = 0; colors.s = 0; colors.v = 0
+        weight = 0
         color = Color.BLACK
     }
     fun clone(): ColorGroup {
         val out = ColorGroup()
-        val m = mutableListOf<HSVColor>()
-        m.addAll(colors.toMutableList())
-        out.colors = arrayListOf(*m.toTypedArray())
+        out.weight = this.weight
+        out.colors = HSVColor(colors.h, colors.s, colors.v)
         out.color = Color(color.red, color.green, color.blue)
         return out
     }

@@ -69,7 +69,7 @@ class LPX {
      * The internal output command. Pass in a unit function to execute between opening and closing the stream.
      * @param function The function to run in between stream open/close.
      */
-    private fun output(function: (Unit) -> Unit) {
+    @Synchronized private fun output(function: (Unit) -> Unit) {
         try {
             output.open()
             function.invoke(Unit)

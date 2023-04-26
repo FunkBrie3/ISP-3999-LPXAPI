@@ -13,7 +13,7 @@ object SaveAnim {
     }
 
     public fun save(fileName: String, dp: DrawingPad) {
-        val file: File = File("${fileName}.lpa")
+        val file: File = File(fileName)
         if(!file.exists()) file.createNewFile()
         val outStream: FileOutputStream = FileOutputStream(file)
         val virtualPng: Array<Array<Color>> = Array(9) { Array(9) { Color.BLACK } }

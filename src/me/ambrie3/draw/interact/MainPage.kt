@@ -104,7 +104,7 @@ class MainPage(val dp: DrawingPad): LaunchpadReceiver {
 
         if (sel == JFileChooser.APPROVE_OPTION) {
             val file: File = fileChooser.selectedFile
-            SaveAnim.save(file.absolutePath, dp)
+            SaveAnim.save("${file.name}.lpa", dp)
         }
     }
 
